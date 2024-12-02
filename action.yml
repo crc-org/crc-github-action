@@ -1,0 +1,68 @@
+name: 'Run OpenShift/MicroShift cluster'
+description: 'Run OpenShift/Microshift cluster using GH action'
+inputs:
+  pull-secret:
+    description: 'pull-secret in case running OCP/Microshift.'
+    required: true
+    default: '{"auths":{"fake":{"auth": "Zm9vOmJhcgo="}}}'
+  preset:
+    description: 'preset to use for CRC microshift/okd/openshift (default microshift).'
+    required: true
+    default: 'microshift'
+runs:
+  using: 'composite'
+  steps:
+    - name: Check runner OS
+      if: ${{ runner.os != 'Linux' }}
+      shell: bash
+      run: |
+        echo "::error title=⛔ error hint::Support Linux Only"
+        exit 1
+    - name: Download CRC
+      shell: bash
+      id: download
+      run: |
+        if [ ${{ runner.arch }} = "X64" ]; then
+          TS_ARCH="amd64"
+        else
+          TS_ARCH="amd64"
+        URL="https://developers.redhat.com/content-gateway/file/pub/openshift-v4/clients/crc/latest/crc-linux-${TS_ARCH}.tar.xz"
+        echo "Downloading $URL"
+        curl -H user-agent:crc--github-action -L "$URL" -o crc-linux.tar.xz --max-time 300 --fail
+        SHA256SUM="$(curl -H user-agent:crc-github-action -L "${URL}.sha256" --fail)"
+        echo "Expected sha256: $SHA256SUM"
+        echo "Actual sha256: $(sha256sum crc-linux.tar.xz)"
+        echo "$SHA256SUM  crc-linux.tar.xz" | sha256sum -c
+        tar -C /tmp -xzf crc-linux.tar.xz
+        sudo mv "/tmp/crc-linux-${TS_ARCH}/crc-linux-*-amd64/crc" /usr/bin
+    - name: Install required virtualization software
+      run: |
+        sudo apt-get update
+        sudo apt install qemu-kvm libvirt-daemon libvirt-daemon-system
+        sudo usermod -a -G libvirt $USER
+    - name: Remove unwanted stuff to free up disk image
+      run: |
+        sudo rm -rf /usr/share/dotnet
+        sudo rm -rf /usr/local/lib/android
+        sudo rm -rf /opt/ghc
+        sudo rm -rf "/usr/local/share/boost"
+        sudo rm -rf /opt/hostedtoolcache/CodeQL
+ 
+        sudo docker image prune --all --force
+ 
+        sudo swapoff -a
+        sudo rm -f /mnt/swapfile
+    - name: Set the crc config
+      env:
+        PRESET: ${{ inputs.preset }}
+        PULL_SECRET: ${{ inputs.pull-secret }}
+      run: |
+        echo "${PULL_SECRET}" > pull-secret
+        crc config set preset ${PRESET}
+        crc config set pull-secret-file pull-secret
+        crc config set network-mode user
+    - name: Setup the crc
+      run: sudo -su $USER crc setup
+    - name: Start the crc
+      run: sudo -su $USER crc start
+
