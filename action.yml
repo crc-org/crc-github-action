@@ -36,11 +36,13 @@ runs:
         tar -C /tmp -xzf crc-linux.tar.xz
         sudo mv "/tmp/crc-linux-${TS_ARCH}/crc-linux-*-amd64/crc" /usr/bin
     - name: Install required virtualization software
+      shell: bash
       run: |
         sudo apt-get update
         sudo apt install qemu-kvm libvirt-daemon libvirt-daemon-system
         sudo usermod -a -G libvirt $USER
     - name: Remove unwanted stuff to free up disk image
+      shell: bash
       run: |
         sudo rm -rf /usr/share/dotnet
         sudo rm -rf /usr/local/lib/android
@@ -53,6 +55,7 @@ runs:
         sudo swapoff -a
         sudo rm -f /mnt/swapfile
     - name: Set the crc config
+      shell: bash
       env:
         PRESET: ${{ inputs.preset }}
         PULL_SECRET: ${{ inputs.pull-secret }}
@@ -62,7 +65,9 @@ runs:
         crc config set pull-secret-file pull-secret
         crc config set network-mode user
     - name: Setup the crc
+      shell: bash
       run: sudo -su $USER crc setup
     - name: Start the crc
+      shell: bash
       run: sudo -su $USER crc start
 
