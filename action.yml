@@ -26,15 +26,15 @@ runs:
           TS_ARCH="amd64"
         else
           TS_ARCH="amd64"
-        URL="https://developers.redhat.com/content-gateway/file/pub/openshift-v4/clients/crc/latest/crc-linux-${TS_ARCH}.tar.xz"
+        URL="https://mirror.openshift.com/pub/openshift-v4/clients/crc/latest/crc-linux-${TS_ARCH}.tar.xz"
         echo "Downloading $URL"
         curl -H user-agent:crc--github-action -L "$URL" -o crc-linux.tar.xz --max-time 300 --fail
         SHA256SUM="$(curl -H user-agent:crc-github-action -L ${URL}.sha256 --fail)"
         echo "Expected sha256: $SHA256SUM"
         echo "Actual sha256: $(sha256sum crc-linux.tar.xz)"
         echo "$SHA256SUM  crc-linux.tar.xz" | sha256sum -c
-        tar -C /tmp -xzf crc-linux.tar.xz
-        sudo mv "/tmp/crc-linux-${TS_ARCH}/crc-linux-*-amd64/crc" /usr/bin
+        tar -C /tmp -xvf crc-linux.tar.xz
+        sudo mv /tmp/crc-linux-*-amd64/crc /usr/bin
     - name: Install required virtualization software
       shell: bash
       run: |
