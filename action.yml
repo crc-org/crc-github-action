@@ -9,6 +9,15 @@ inputs:
     description: 'preset to use for CRC microshift/okd/openshift (default microshift).'
     required: true
     default: 'microshift'
+  cpus:
+    description: 'number of cpu consume by crc instance'
+    required: false
+  memory:
+    description: 'memory in MiB consume by crc instance'
+    required: false
+  disk:
+    description: 'disk size consumed by crc instance'
+    required: false
 runs:
   using: 'composite'
   steps:
@@ -64,6 +73,18 @@ runs:
         crc config set preset ${PRESET}
         crc config set pull-secret-file pull-secret
         crc config set network-mode user
+        if [ -n "${{ inputs['cpus'] }}" ]; then
+          echo "Using cpus: ${{ inputs['cpus'] }}"
+          crc config set cpus ${{ inputs['cpus'] }}
+        fi
+        if [ -n "${{ inputs['memory'] }}" ]; then
+          echo "Using memory: ${{ inputs['memory'] }}"
+          crc config set memory ${{ inputs['memory'] }}
+        fi
+        if [ -n "${{ inputs['disk'] }}" ]; then
+          echo "Using disk: ${{ inputs['disk'] }}"
+          crc config set disk-size ${{ inputs['disk'] }}
+        fi
     - name: Setup and Start the crc
       shell: bash
       run: |
