@@ -64,12 +64,12 @@ runs:
         crc config set preset ${PRESET}
         crc config set pull-secret-file pull-secret
         crc config set network-mode user
-    - name: Setup the crc
+    - name: Setup and Start the crc
       shell: bash
-      run: sudo -su $USER crc setup
-    - name: Start the crc
-      shell: bash
-      run: sudo -su $USER crc start
+      run: |
+        sudo -su $USER crc setup
+        sudo -su $USER crc start
+        sleep 60
     - name: Copy OpenShift client
       shell: bash
       run: sudo cp /home/$USER/.crc/bin/oc/oc /usr/bin/
