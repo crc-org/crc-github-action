@@ -70,4 +70,13 @@ runs:
     - name: Start the crc
       shell: bash
       run: sudo -su $USER crc start
+    - name: Copy OpenShift client
+      shell: bash
+      run: sudo cp /home/$USER/.crc/bin/oc/oc /usr/bin/
+    - name: Copy the kubeconfig file to required location
+      shell: bash
+      run: |
+        mkdir -p /home/$USER/.kube
+        cp /home/$USER/.crc/machines/crc/kubeconfig /home/$USER/.kube/config
+        oc get pods -A
 
