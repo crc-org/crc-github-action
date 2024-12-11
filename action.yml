@@ -3,8 +3,7 @@ description: 'Run OpenShift/Microshift cluster using GH action'
 inputs:
   pull-secret:
     description: 'pull-secret in case running OCP/Microshift.'
-    required: true
-    default: '{"auths":{"fake":{"auth": "Zm9vOmJhcgo="}}}'
+    default: ''
   preset:
     description: 'preset to use for CRC microshift/okd/openshift (default microshift).'
     required: true
@@ -26,6 +25,14 @@ runs:
       shell: bash
       run: |
         echo "::error title=⛔ error hint::Support Linux Only"
+        exit 1
+    - name: Check pull-secret
+      if: |
+        (inputs.preset == 'microshift' || inputs.preset == 'openshift') &&
+        inputs.pull-secret == ''
+      shell: bash
+      run: |
+        echo "::error title=⛔ error hint::For preset ${{ inputs.preset }} pull-secret is required"
         exit 1
     - name: Download CRC
       shell: bash
