@@ -18,6 +18,9 @@ inputs:
   disk:
     description: 'disk size consumed by crc instance'
     required: false
+  cache:
+    description: 'enable cache to speed up cluster starts: true or false (default true). '
+    default: 'true'
 runs:
   using: 'composite'
   steps:
@@ -27,6 +30,28 @@ runs:
       run: |
         echo "::error title=⛔ error hint::Support Linux Only"
         exit 1
+
+    - name: Set CRC versions
+      if: ${{ inputs.cache == 'true' }}
+      shell: bash
+      run: |
+        curl -LO https://mirror.openshift.com/pub/openshift-v4/clients/crc/latest/release-info.json
+        echo "crc_version=$(jq -r '.version.crcVersion' release-info.json)" >> "$GITHUB_ENV"
+
+    - name: Cache for crc binary
+      if: ${{ inputs.cache == 'true' }}
+      uses: actions/cache@v4
+      with:
+        path: installer
+        key: installer-${{ env.crc_version}}-${{ runner.arch }}
+
+    - name: Cache for bundle
+      if: ${{ inputs.cache == 'true' }}
+      uses: actions/cache@v4
+      with:
+        path: ~/.crc/cache
+        key: bundle-${{ inputs.preset}}-${{ env.crc_version }}-${{ runner.arch }}
+
     - name: Download CRC
       shell: bash
       run: |
@@ -36,20 +61,26 @@ runs:
           CRC_ARCH="amd64"
         fi
         URL="https://mirror.openshift.com/pub/openshift-v4/clients/crc/latest/crc-linux-${CRC_ARCH}.tar.xz"
-        echo "Downloading $URL"
-        curl -H user-agent:crc-github-action -L "$URL" -o crc-linux.tar.xz --max-time 300 --fail
-        SHA256SUM=$(curl -H user-agent:crc-github-action -L "${URL}".sha256 --fail)
-        echo "Expected sha256: $SHA256SUM"
-        echo "Actual sha256: $(sha256sum crc-linux.tar.xz)"
-        echo "$SHA256SUM  crc-linux.tar.xz" | sha256sum -c
+        mkdir -p installer
+        pushd installer
+        if [ ! -f crc-linux.tar.xz ]; then
+            echo "Downloading $URL"
+            curl -H user-agent:crc-github-action -L "$URL" -o crc-linux.tar.xz --max-time 300 --fail
+            SHA256SUM=$(curl -H user-agent:crc-github-action -L "${URL}".sha256 --fail)
+            echo "Expected sha256: $SHA256SUM"
+            echo "Actual sha256: $(sha256sum crc-linux.tar.xz)"
+            echo "$SHA256SUM  crc-linux.tar.xz" | sha256sum -c
+        fi
         tar -C /tmp -xvf crc-linux.tar.xz
         sudo mv /tmp/crc-linux-*-amd64/crc /usr/bin
+
     - name: Install required virtualization software
       shell: bash
       run: |
         sudo apt-get update
         sudo apt install qemu-kvm libvirt-daemon libvirt-daemon-system
         sudo usermod -a -G libvirt $USER
+
     - name: Remove unwanted stuff to free up disk image
       shell: bash
       run: |
@@ -63,6 +94,7 @@ runs:
  
         sudo swapoff -a
         sudo rm -f /mnt/swapfile
+
     - name: Set the crc config
       shell: bash
       env:
@@ -85,15 +117,18 @@ runs:
           echo "Using disk: ${{ inputs['disk'] }}"
           crc config set disk-size ${{ inputs['disk'] }}
         fi
+
     - name: Setup and Start the crc
       shell: bash
       run: |
         sudo -su $USER crc setup
         sudo -su $USER crc start
         sleep 60
+
     - name: Copy OpenShift client
       shell: bash
       run: sudo cp /home/$USER/.crc/bin/oc/oc /usr/bin/
+
     - name: Copy the kubeconfig file to required location
       shell: bash
       run: |
