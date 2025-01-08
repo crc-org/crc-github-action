@@ -23,7 +23,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up CRC
-        uses: praveenkumar/crc-github-action@v1
+        uses: crc-org/crc-github-action@v1
         with:
           pull-secret: ${{ secrets.CRC_PULL_SECRET }}
           preset: openshift/microshift/okd (default is microshift)
