@@ -78,7 +78,7 @@ runs:
       shell: bash
       run: |
         sudo apt-get update
-        sudo apt install qemu-kvm libvirt-daemon libvirt-daemon-system
+        sudo apt install qemu-kvm libvirt-daemon libvirt-daemon-system virtiofsd
         sudo usermod -a -G libvirt $USER
 
     - name: Remove unwanted stuff to free up disk image
