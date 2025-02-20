@@ -104,7 +104,6 @@ runs:
         echo "${PULL_SECRET}" > pull-secret
         crc config set preset ${PRESET}
         crc config set pull-secret-file pull-secret
-        crc config set network-mode user
         if [ -n "${{ inputs['cpus'] }}" ]; then
           echo "Using cpus: ${{ inputs['cpus'] }}"
           crc config set cpus ${{ inputs['cpus'] }}
