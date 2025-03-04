@@ -4,6 +4,10 @@ The CRC GitHub Action is a custom GitHub Action designed to integrate CRC into y
 This action facilitates the setup, start, and management of CRC instances directly within your GitHub
 Actions pipelines, enabling seamless testing and development of your workload on OpenShift/MicroShift.
 
+> [!NOTE]
+> You are advised to maximize available diskspace using a third-party action.
+
+
 ## Features
 
 - **Automated CRC Setup**: Installs and configures CRC on the runner.

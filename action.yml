@@ -81,20 +81,6 @@ runs:
         sudo apt install -y qemu-kvm libvirt-daemon libvirt-daemon-system virtiofsd
         sudo usermod -a -G libvirt $USER
 
-    - name: Remove unwanted stuff to free up disk image
-      shell: bash
-      run: |
-        sudo rm -rf /usr/share/dotnet
-        sudo rm -rf /usr/local/lib/android
-        sudo rm -rf /opt/ghc
-        sudo rm -rf "/usr/local/share/boost"
-        sudo rm -rf /opt/hostedtoolcache/CodeQL
- 
-        sudo docker image prune --all --force
- 
-        sudo swapoff -a
-        sudo rm -f /mnt/swapfile
-
     - name: Set the crc config
       shell: bash
       env:
