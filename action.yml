@@ -58,7 +58,7 @@ runs:
         if [ ${{ runner.arch }} = "X64" ]; then
           CRC_ARCH="amd64"
         else
-          CRC_ARCH="amd64"
+          CRC_ARCH="arm64"
         fi
         URL="https://mirror.openshift.com/pub/openshift-v4/clients/crc/latest/crc-linux-${CRC_ARCH}.tar.xz"
         mkdir -p installer
