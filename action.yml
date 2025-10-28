@@ -21,6 +21,9 @@ inputs:
   cache:
     description: 'enable cache to speed up cluster starts: true or false (default true). '
     default: 'true'
+  version:
+    description: 'crc version (default latest).'
+    default: 'latest'
 runs:
   using: 'composite'
   steps:
@@ -34,8 +37,10 @@ runs:
     - name: Set CRC versions
       if: ${{ inputs.cache == 'true' }}
       shell: bash
+      env:
+        VERSION: ${{ inputs.version }}
       run: |
-        curl -LO https://mirror.openshift.com/pub/openshift-v4/clients/crc/latest/release-info.json
+        curl -LO https://mirror.openshift.com/pub/openshift-v4/clients/crc/${VERSION}/release-info.json
         echo "crc_version=$(jq -r '.version.crcVersion' release-info.json)" >> "$GITHUB_ENV"
 
     - name: Cache for crc binary
@@ -54,13 +59,15 @@ runs:
 
     - name: Download CRC
       shell: bash
+      env:
+        VERSION: ${{ inputs.version }}
       run: |
         if [ ${{ runner.arch }} = "X64" ]; then
           CRC_ARCH="amd64"
         else
           CRC_ARCH="arm64"
         fi
-        URL="https://mirror.openshift.com/pub/openshift-v4/clients/crc/latest/crc-linux-${CRC_ARCH}.tar.xz"
+        URL="https://mirror.openshift.com/pub/openshift-v4/clients/crc/${VERSION}/crc-linux-${CRC_ARCH}.tar.xz"
         mkdir -p installer
         pushd installer
         if [ ! -f crc-linux.tar.xz ]; then

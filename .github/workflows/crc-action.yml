@@ -36,4 +36,3 @@ jobs:
           cpus: 4
           memory: 6098
           disk: 40
-          

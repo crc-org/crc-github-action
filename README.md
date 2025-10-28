@@ -54,6 +54,7 @@ jobs:
 | `cpus`        | Number of cpus (default as per preset) (integer value)        | No       | `'as per preset'` |
 | `memory`      | Memory in MiB (default as per preset) (integer value)         | No       | `'as per preset'` |
 | `disk`        | disk size in GiB (default as per preset) (integer value)      | No       | `'as per preset'` |
+| `version`     | crc version (default latest) (string value)                   | No       | `'latest'`        |
 
 #### Example
 - https://github.com/praveenkumar/simple-go-server/blob/main/.github/workflows/crc_linux.yaml
