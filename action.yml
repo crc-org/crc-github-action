@@ -87,6 +87,12 @@ runs:
         sudo apt-get update
         sudo apt install -y qemu-kvm libvirt-daemon libvirt-daemon-system virtiofsd
         sudo usermod -a -G libvirt $USER
+        # Work around GitHub runner/AppArmor incompatibility for libvirt/QEMU
+        sudo tee /etc/libvirt/qemu.conf >/dev/null <<'EOF'
+        security_driver = "none"
+        EOF
+        sudo systemctl stop apparmor || true
+        sudo systemctl restart libvirtd
 
     - name: Set the crc config
       shell: bash
