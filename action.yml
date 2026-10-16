@@ -40,7 +40,7 @@ runs:
       env:
         VERSION: ${{ inputs.version }}
       run: |
-        curl -LO https://mirror.openshift.com/pub/openshift-v4/clients/crc/${VERSION}/release-info.json
+        curl -LO https://mirror.openshift.com/pub/cgw/crc/${VERSION}/release-info.json
         echo "crc_version=$(jq -r '.version.crcVersion' release-info.json)" >> "$GITHUB_ENV"
 
     - name: Cache for crc binary
@@ -67,7 +67,7 @@ runs:
         else
           CRC_ARCH="arm64"
         fi
-        URL="https://mirror.openshift.com/pub/openshift-v4/clients/crc/${VERSION}/crc-linux-${CRC_ARCH}.tar.xz"
+        URL="https://mirror.openshift.com/pub/cgw/crc/${VERSION}/crc-linux-${CRC_ARCH}.tar.xz"
         mkdir -p installer
         pushd installer
         if [ ! -f crc-linux.tar.xz ]; then
