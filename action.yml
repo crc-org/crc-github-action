@@ -85,7 +85,14 @@ runs:
       shell: bash
       run: |
         sudo apt-get update
-        sudo apt install -y qemu-kvm libvirt-daemon libvirt-daemon-system virtiofsd
+        # qemu-kvm is only a virtual package on Ubuntu 24.04 and is gone on 26.04,
+        # so install the emulator package for the runner's architecture directly.
+        if [ ${{ runner.arch }} = "X64" ]; then
+          QEMU_PKG="qemu-system-x86"
+        else
+          QEMU_PKG="qemu-system-arm"
+        fi
+        sudo apt install -y "$QEMU_PKG" libvirt-daemon libvirt-daemon-system virtiofsd
         sudo usermod -a -G libvirt $USER
         # Work around GitHub runner/AppArmor incompatibility for libvirt/QEMU
         sudo tee /etc/libvirt/qemu.conf >/dev/null <<'EOF'
